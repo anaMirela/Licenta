@@ -15,6 +15,12 @@
 		<junit.version>3.8.1</junit.version>
 		<jetty.version>9.2.11.v20150529</jetty.version>
 	</properties>
+	<repositories>
+		<repository>
+			<id>jgit-repository</id>
+			<url>https://repo.eclipse.org/content/groups/releases/</url>
+		</repository>
+	</repositories>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -44,6 +50,24 @@
 			<version>${servletapi.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- JGit Core Library -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>4.2.0.201601211800-r</version>
+		</dependency>
+		<!-- Smart HTTP Servlet -->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit.http.server</artifactId>
+			<version>4.2.0.201601211800-r</version>
+		</dependency>
+		<!-- AWT UI Helpers -->
+		<dependency>
+			 <groupId>org.eclipse.jgit</groupId>
+			 <artifactId>org.eclipse.jgit.ui</artifactId>
+			 <version>4.2.0.201601211800-r</version>
+    	</dependency>
 	</dependencies>
 	<build>
 		<plugins>
@@ -65,7 +89,7 @@
 				<configuration>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 					<webApp>
-					<contextPath>/spring3</contextPath>
+					<contextPath>/licenta</contextPath>
 				</webApp>
 				</configuration>
 			</plugin>

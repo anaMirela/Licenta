@@ -8,5 +8,13 @@
 </head>
 <body>
 	<h1>Licenta</h1>
+	<form method="POST" action="/licenta/checkout">
+		<h3> Checkout from Git form</h3>
+		<label for="remoteUrl">Remote URL</label>
+		<input id="remoteUrl" type="text"><br><br>
+		<label for="directoryPath">Path for checkout directory:</label>
+		<input id="directoryPath" type="text"><br>
+     	<input type="submit" value="Submit"/><br>
+     </form>
 </body>
 </html>
