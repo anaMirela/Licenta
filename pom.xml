@@ -1,34 +1,39 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.licenta</groupId>
-	<artifactId>Licenta</artifactId>
-	<packaging>jar</packaging>
-	<version>1.0-SNAPSHOT</version>
-	<name>Licenta</name>
-	<url>http://maven.apache.org</url>
-	<properties>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.licenta</groupId>
+  <artifactId>licenta</artifactId>
+  <packaging>war</packaging>
+  <version>1.0</version>
+  <name>licenta Maven Webapp</name>
+  <url>http://maven.apache.org</url>
+  
+  <properties>
 		<jdk.version>1.8</jdk.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<spring.version>3.2.13.RELEASE</spring.version>
 		<jstl.version>1.2</jstl.version>
 		<servletapi.version>3.1.0</servletapi.version>
 		<junit.version>3.8.1</junit.version>
 		<jetty.version>9.2.11.v20150529</jetty.version>
 	</properties>
+	
 	<repositories>
 		<repository>
 			<id>jgit-repository</id>
 			<url>https://repo.eclipse.org/content/groups/releases/</url>
 		</repository>
 	</repositories>
+	
+	
 	<dependencies>
 		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
+			 <groupId>junit</groupId>
+			 <artifactId>junit</artifactId>
+			 <version>3.8.1</version>
+			 <scope>test</scope>
 		</dependency>
-		
 		<!-- Spring framework -->
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -68,33 +73,52 @@
 			 <artifactId>org.eclipse.jgit.ui</artifactId>
 			 <version>4.2.0.201601211800-r</version>
     	</dependency>
+    	
+    	<!-- Mongo DB  -->
+		<dependency>
+		    <groupId>org.mongodb</groupId>
+		    <artifactId>mongo-java-driver</artifactId>
+		    <version>2.7.2</version>
+		</dependency>
 	</dependencies>
+	
 	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.3</version>
-				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
-				</configuration>
-			</plugin>
-			
-			<!-- embedded jetty -->
-			<plugin>
-				<groupId>org.eclipse.jetty</groupId>
-				<artifactId>jetty-maven-plugin</artifactId>
-				<version>${jetty.version}</version>
-				<configuration>
-					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<webApp>
-					<contextPath>/licenta</contextPath>
-				</webApp>
-				</configuration>
-			</plugin>
-			
-			<!-- configure Eclipse workspace -->
+	  <finalName>licenta</finalName>
+	  <plugins>
+		  <plugin>
+		    <groupId>org.apache.maven.plugins</groupId>
+		    <artifactId>maven-dependency-plugin</artifactId>
+		    <version>2.3</version>
+		    
+		    <executions>
+		      <execution>
+		        <phase>package</phase>
+		        <goals><goal>copy</goal></goals>
+		        <configuration>
+		          <artifactItems>
+		            <artifactItem>
+		              <groupId>org.eclipse.jetty</groupId>
+		              <artifactId>jetty-runner</artifactId>
+		              <version>9.3.3.v20150827</version>
+		              <destFileName>jetty-runner.jar</destFileName>
+		            </artifactItem>
+		          </artifactItems>
+		        </configuration>
+		      </execution>
+		     </executions>
+		  </plugin>
+		  
+		  <plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.3</version>
+			<configuration>
+				<source>${jdk.version}</source>
+				<target>${jdk.version}</target>
+			</configuration>
+		</plugin>
+		
+		  <!-- configure Eclipse workspace -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
@@ -109,4 +133,3 @@
 		</plugins>
 	</build>
 </project>
-

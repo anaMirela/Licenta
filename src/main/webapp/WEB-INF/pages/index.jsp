@@ -8,7 +8,7 @@
 </head>
 <body>
 	<h1>Licenta</h1>
-	<form method="POST" action="/licenta/checkout">
+	<form method="POST" action="/checkout">
 		<h3> Checkout from Git form</h3>
 		<label for="remoteUrl">Remote URL</label>
 		<input id="remoteUrl" type="text"><br><br>
