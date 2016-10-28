@@ -1,1 +1,14 @@
-com/licenta/ExampleController.class
+com/licenta/controller/LoginController.class
+com/licenta/controller/DeploymentConfigurationController.class
+com/licenta/controller/BuildHistoryController.class
+com/licenta/model/DeploymentConfiguration.class
+com/licenta/controller/RunCommandsController.class
+com/licenta/dao/UserDao.class
+com/licenta/utils/CommonUtils.class
+com/licenta/utils/CommandsUtils$1.class
+com/licenta/dao/DeploymentConfigurationDao.class
+com/licenta/dao/BuildHistoryDao.class
+com/licenta/model/User.class
+com/licenta/utils/CommandsUtils.class
+com/licenta/utils/DBUtils.class
+com/licenta/model/BuildHistory.class

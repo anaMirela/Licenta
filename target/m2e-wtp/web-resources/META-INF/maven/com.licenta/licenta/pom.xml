@@ -17,6 +17,7 @@
 		<servletapi.version>3.1.0</servletapi.version>
 		<junit.version>3.8.1</junit.version>
 		<jetty.version>9.2.11.v20150529</jetty.version>
+		<jettyVersion>9.4.0-SNAPSHOT</jettyVersion>
 	</properties>
 	
 	<repositories>
@@ -73,15 +74,44 @@
 			 <artifactId>org.eclipse.jgit.ui</artifactId>
 			 <version>4.2.0.201601211800-r</version>
     	</dependency>
-    	
-    	<!-- Mongo DB  -->
+
+		<!-- mongodb java driver -->
 		<dependency>
-		    <groupId>org.mongodb</groupId>
-		    <artifactId>mongo-java-driver</artifactId>
-		    <version>2.7.2</version>
+			<groupId>org.mongodb</groupId>
+			<artifactId>mongo-java-driver</artifactId>
+			<version>3.2.0</version>
 		</dependency>
+		
+		<!-- Spring data mongodb -->
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-mongodb</artifactId>
+			<version>1.7.0.RELEASE</version>
+		</dependency>
+		
+		<!-- Jackson Dependency -->
+		<dependency>
+			<groupId>org.codehaus.jackson</groupId>
+			<artifactId>jackson-mapper-asl</artifactId>
+			<version>1.9.13</version>
+		</dependency>
+		
+		<!-- http://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlets -->
+		<dependency>
+		    <groupId>org.eclipse.jetty</groupId>
+		    <artifactId>jetty-servlets</artifactId>
+		    <version>9.3.3.v20150827</version>
+		</dependency>
+		
+		<!-- https://mvnrepository.com/artifact/javax.mail/mail -->
+		<dependency>
+		    <groupId>javax.mail</groupId>
+		    <artifactId>mail</artifactId>
+		    <version>1.4</version>
+		</dependency>
+		
 	</dependencies>
-	
+
 	<build>
 	  <finalName>licenta</finalName>
 	  <plugins>
@@ -103,10 +133,17 @@
 		              <destFileName>jetty-runner.jar</destFileName>
 		            </artifactItem>
 		          </artifactItems>
+		          
 		        </configuration>
 		      </execution>
 		     </executions>
-		  </plugin>
+		  </plugin> 
+		  
+		<!--    <plugin>
+        <groupId>org.eclipse.jetty</groupId>
+        <artifactId>jetty-maven-plugin</artifactId>
+        <version>${jetty.version}</version>
+      </plugin>-->
 		  
 		  <plugin>
 			<groupId>org.apache.maven.plugins</groupId>

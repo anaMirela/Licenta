@@ -1,0 +1,266 @@
+package com.licenta.utils;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Properties;
+import java.util.concurrent.TimeUnit;
+
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.licenta.dao.BuildHistoryDao;
+import com.licenta.dao.DeploymentConfigurationDao;
+import com.licenta.model.BuildHistory;
+import com.licenta.model.DeploymentConfiguration;
+
+public class CommandsUtils {
+
+	public static final String MAVEN_CLEAN_PACKAGE = "mvn clean package";
+	public static final String JAVA_RUN_JAR = "java -jar target/*.jar";
+	public static final String JETTY_RUN = "mvn jetty:run -Djetty.port=8999";
+	public static final String CHANGE_DIRECTORY = "cd ";
+	public String[] finalCommand = { "/bin/sh", "-c", "" };
+	
+	private BuildHistory buildHistory;
+	
+	@Autowired
+	private DeploymentConfigurationDao deploymentConfigurationDao;
+	
+	@Autowired
+	private BuildHistoryDao buildHistoryDao;
+	
+	/**
+	 * Method called for executing checkout and build for a deployment configuration
+	 * @param deploymentConfiguration
+	 * 		The deployment configuration
+	 */
+	public void checkoutAndBuild(DeploymentConfiguration deploymentConfiguration) {
+		buildHistory = new BuildHistory();
+		checkoutFromGit(deploymentConfiguration.getRepositoryLocation(), deploymentConfiguration.getLocalPath(), deploymentConfiguration.getName(), deploymentConfiguration.getUsername());
+		//constructBuildCommand(deploymentConfiguration.getLocalPath());
+		constructBuildCommand(buildHistory.getPathToBuild());
+		boolean success = runFinalCommand();
+		String currentTime = CommonUtils.getCurrentTimeAsString();
+		
+		// create new build history
+		createBuildHistory(deploymentConfiguration.getName(), deploymentConfiguration.getUsername(), currentTime, success);
+		buildHistoryDao.save(buildHistory);
+		// update build date
+		deploymentConfiguration.setLastBuildDate(currentTime);
+		deploymentConfiguration.setLastSuccess(buildHistory.getSuccess());
+		deploymentConfigurationDao.update(deploymentConfiguration);
+		sendEmail(deploymentConfiguration, false);
+	}
+	
+	/**
+	 * Method called for executing checkout, build and run for a deployment configuration
+	 * @param deploymentConfiguration
+	 * 		The deployment configuration
+	 */
+	public void checkoutBuildAndRun(DeploymentConfiguration deploymentConfiguration) {
+		buildHistory = new BuildHistory();
+		checkoutFromGit(deploymentConfiguration.getRepositoryLocation(), deploymentConfiguration.getLocalPath(), deploymentConfiguration.getName(), deploymentConfiguration.getUsername());
+		//constructBuildCommand(deploymentConfiguration.getLocalPath());
+		constructBuildCommand(buildHistory.getPathToBuild());
+		constructRunCommand(deploymentConfiguration.getServer());
+		boolean success = runFinalCommand();
+		String currentTime = CommonUtils.getCurrentTimeAsString();
+		
+		// create new build history
+		createBuildHistory(deploymentConfiguration.getName(), deploymentConfiguration.getUsername(), currentTime, success);
+		buildHistoryDao.save(buildHistory);
+		
+		// update build date
+		deploymentConfiguration.setLastBuildDate(currentTime);
+		deploymentConfiguration.setLastSuccess(buildHistory.getSuccess());
+		deploymentConfigurationDao.update(deploymentConfiguration);
+		sendEmail(deploymentConfiguration, true);
+	}
+	
+	/**
+	 * Method called for executing checkout from Git repository
+	 * @param repository
+	 * @param localPath2
+	 */
+	public void checkoutFromGit(String repository, String localPath, String configName, String username) {
+		String buildLocation = createUniqueLocationForBuild(localPath, configName, username);
+		try {
+			File localDirectory = new File(buildLocation);
+			if (localDirectory.exists()) {
+				//CommonUtils.deleteDirectory(localDirectory);
+				localDirectory = new File(buildLocation);
+			}
+			Git.cloneRepository().setURI(repository).setDirectory(localDirectory).call();
+		} catch (GitAPIException e) {
+			System.out.println(">>>>>>>>>>>>>>>GIT API EXCEPTION");
+		}
+		buildHistory.setPathToBuild(buildLocation);
+	}
+	
+	/**
+	 * Method called for building a command to be run
+	 * @param localPath
+	 */
+	public void constructBuildCommand(String localPath) {
+		finalCommand[2] = CHANGE_DIRECTORY + localPath + "; " + MAVEN_CLEAN_PACKAGE + ";";
+		System.out.println(">>>>>>>>>>Final command is " + finalCommand[2]);		
+	}
+	
+	/**
+	 * Method called for building a command to be run
+	 * @param server
+	 */
+	public void constructRunCommand(String server) {
+		// for other servers - cp in locatia specifica de pe server
+		//finalCommand[2] += JAVA_RUN_JAR;
+		finalCommand[2] += JETTY_RUN;
+		System.out.println(">>>>>>>>>>Final command is " + finalCommand[2]);
+	}
+	
+	/**
+	 * Method called to execute the final command
+	 * @return
+	 * 		true if the command is executed successfully
+	 */
+	public boolean runFinalCommand() {
+		String log = "";
+		Process p = null;
+		try {
+			p = Runtime.getRuntime().exec(finalCommand);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+			log = "";
+			String line = "";
+			while ((line = reader.readLine()) != null) {
+				System.out.println(line);
+				log += line + "\n";
+			}
+			p.waitFor(10, TimeUnit.SECONDS);
+			p.destroy();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		buildHistory.setLog(log);
+		if (p != null && p.exitValue() == 0) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Method called for creating the build history object
+	 * @param configurationName
+	 * @param username
+	 * @param currentTime
+	 * @param success
+	 * @return
+	 */
+	public BuildHistory createBuildHistory(String configurationName, String username, String currentTime, boolean success) {
+		int count = buildHistoryDao.countByUsernameAndConfigName(username, configurationName);
+		buildHistory.setCount(++count);
+		buildHistory.setConfigurationName(configurationName);
+		buildHistory.setUsername(username);
+		buildHistory.setBuildDate(currentTime);
+		if (success) {
+			buildHistory.setSuccess("SUCCESS");
+		} else {
+			buildHistory.setSuccess("FAIL");
+		}
+		return buildHistory;
+	}
+	
+	/**
+	 * Method called for creating a unique location for the build artefact
+	 * @param localPath
+	 * @param configName
+	 * @param count
+	 * @return
+	 */
+	public String createUniqueLocationForBuild(String localPath, String configName, String username) {
+		int count = buildHistoryDao.countByUsernameAndConfigName(username, configName);
+		count++;
+		if (!localPath.endsWith("/")) {
+			localPath += "/";
+		}
+		localPath += configName + "-test-" + count;
+		System.out.println(">>>>>>>>>>>>>>The path for build is " + localPath);
+		return localPath;
+	}
+	
+	public void sendEmail(DeploymentConfiguration deploymentConfiguration, boolean withDeploy) {
+		final String username = "deploy.application@gmail.com";
+		final String password = "";
+
+		Properties props = new Properties();
+		props.put("mail.smtp.auth", "true");
+		props.put("mail.smtp.starttls.enable", "true");
+		props.put("mail.smtp.host", "smtp.gmail.com");
+		props.put("mail.smtp.port", "587");
+
+		Session session = Session.getInstance(props,
+		  new javax.mail.Authenticator() {
+			protected PasswordAuthentication getPasswordAuthentication() {
+				return new PasswordAuthentication(username, password);
+			}
+		 });
+
+		try {
+			String content = "";
+			if (withDeploy) {
+				content += "Build and deploy operations were executed for project " + deploymentConfiguration.getName() + " by " + deploymentConfiguration.getUsername() + ".";
+			} else {
+				content += "Build operation was executed for project " + deploymentConfiguration.getName() + " by " + deploymentConfiguration.getUsername() + ".";
+			}
+			content += "\nThe operations resulted in " + deploymentConfiguration.getLastSuccess();
+			content += "\n\n Do not respond to this email because is generated automatically!";
+			
+			Message message = new MimeMessage(session);
+			message.setFrom(new InternetAddress("deploy.application@gmail.com"));
+			message.setRecipients(Message.RecipientType.TO,
+				InternetAddress.parse(deploymentConfiguration.getEmailAddresses()));
+			message.setSubject("Build executed");
+			message.setText(content);
+			Transport.send(message);
+			System.out.println("Done");
+
+		} catch (MessagingException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public BuildHistory getBuildHistory() {
+		return buildHistory;
+	}
+
+	public void setBuildHistory(BuildHistory buildHistory) {
+		this.buildHistory = buildHistory;
+	}
+	
+	public DeploymentConfigurationDao getDeploymentConfigurationDao() {
+		return deploymentConfigurationDao;
+	}
+
+	public void setDeploymentConfigurationDao(DeploymentConfigurationDao deploymentConfigurationDao) {
+		this.deploymentConfigurationDao = deploymentConfigurationDao;
+	}
+
+	public BuildHistoryDao getBuildHistoryDao() {
+		return buildHistoryDao;
+	}
+
+	public void setBuildHistoryDao(BuildHistoryDao buildHistoryDao) {
+		this.buildHistoryDao = buildHistoryDao;
+	}
+}

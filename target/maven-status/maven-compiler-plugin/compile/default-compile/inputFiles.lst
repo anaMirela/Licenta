@@ -1,2 +1,13 @@
-/home/mirela/workspace/licenta-mirimia/src/main/java/com/licenta/SpringConfig.java
-/home/mirela/workspace/licenta-mirimia/src/main/java/com/licenta/ExampleController.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/utils/CommonUtils.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/dao/UserDao.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/model/DeploymentConfiguration.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/dao/BuildHistoryDao.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/model/User.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/controller/DeploymentConfigurationController.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/utils/CommandsUtils.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/controller/BuildHistoryController.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/utils/DBUtils.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/controller/RunCommandsController.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/model/BuildHistory.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/controller/LoginController.java
+/home/mirela/workspace2/heroku-repo/proiect-licenta/src/main/java/com/licenta/dao/DeploymentConfigurationDao.java
